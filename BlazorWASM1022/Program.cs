@@ -17,7 +17,7 @@ namespace BlazorWASM1022
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("app");
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress);
+            builder.Services.AddScoped<GraphAPIAuthorizationMessageHandler>();
 
             builder.Services.AddHttpClient("GraphAPI",
                     client => client.BaseAddress = new Uri("https://graph.microsoft.com"))
@@ -26,8 +26,9 @@ namespace BlazorWASM1022
             builder.Services.AddMsalAuthentication(options =>
             {
                 builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
-                // HERE I add the scopes
-                options.ProviderOptions.DefaultAccessTokenScopes.Add("User.Read Mail.Read");
+                
+                options.ProviderOptions.DefaultAccessTokenScopes.Add("User.Read");
+                options.ProviderOptions.DefaultAccessTokenScopes.Add("Mail.Read");
             });
 
             await builder.Build().RunAsync();
