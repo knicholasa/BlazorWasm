@@ -1,4 +1,4 @@
-﻿@page "/fetchdata"
+@page "/fetchdata"
 @using System.ComponentModel.DataAnnotations
 @using System.Text.Json.Serialization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
@@ -47,18 +47,7 @@ else
     protected override async Task OnInitializedAsync()
     {
         _httpClient = HttpClientFactory.CreateClient("GraphAPI");
-
-        // HERE I commented out the scope request code
-
-        //var tokenResult = await TokenProvider.RequestAccessToken(
-        //    new AccessTokenRequestOptions
-        //    {
-        //        Scopes = new[] { "https://graph.microsoft.com/Mail.Read" }
-        //    });
-        //
-        //if (tokenResult.TryGetToken(out var token))
-        //{
-        //    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Value);
+        try {
             var dataRequest = await _httpClient.GetAsync("https://graph.microsoft.com/beta/me");
 
             if (dataRequest.IsSuccessStatusCode)
@@ -83,7 +72,12 @@ else
                     messages.Add(message);
                 }
             }
-       // }
+        }
+        catch (AccessTokenNotAvailableException ex)
+        {
+            // Tokens are not valid - redirect the user to log in again
+            ex.Redirect();
+        }
     }
 
     public class MailMessage
